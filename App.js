@@ -1,5 +1,10 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableNativeFeedback } from "react-native";
+import { openDatabase } from 'react-native-sqlite-storage';
+
+var db = openDatabase({ name: 'UserDatabase.db' });
+
+
 
 export default class App extends Component {
   render() {
