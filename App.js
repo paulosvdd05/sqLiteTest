@@ -33,7 +33,7 @@ export default class App extends Component {
         'SELECT * FROM Produtos',  //Query to execute as prepared statement
         [],  //Argument to pass for the prepared statement
         (tx, results) => {
-          console.warn(results.rows.item(0).prod_nome);
+          console.warn(results.rows.item(5).prod_desc);
         }  //Callback function to handle the result
       );
     });
@@ -79,7 +79,7 @@ export default class App extends Component {
             value={this.state.desc}
             onChangeText={desc => this.setState({ desc })} />
         </View>
-        <TouchableNativeFeedback onPress={this.deletarTabela}>
+        <TouchableNativeFeedback onPress={this.selecionarProdutos}>
           <View style={styles.botao}>
             <Text style={styles.texto2}>Cadastrar</Text>
           </View>
