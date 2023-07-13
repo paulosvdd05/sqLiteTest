@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableNativeFeedback } from "react-native";
 import { openDatabase } from 'react-native-sqlite-storage';
 
-var db = openDatabase({ name: 'UserDatabase.db' });
+var db = openDatabase({ name: 'DatabaseProduotos.db' });
 
 const initialState = {
   nome: '',
@@ -15,21 +15,55 @@ export default class App extends Component {
     ...initialState
   }
 
-  criarTabela = () => {
-    db.transaction(function (tx) {
+  criarTabela = async () => {
+    await db.transaction((tx) => {
       tx.executeSql(
-        'CREATE TABLE IF NOT EXISTS Produtos (prod_id INT AUTO_INCREMENT, prod_nome varchar(30), prod_desc varchar(70), PRIMARY KEY (prod_id))',  //Query to execute as prepared statement
+        'CREATE TABLE Produtos (prod_id INT AUTO_INCREMENT, prod_nome varchar(30), prod_desc varchar(70), PRIMARY KEY (prod_id))',  //Query to execute as prepared statement
         [],  //Argument to pass for the prepared statement
         (tx, results) => {
-          console.warn(tx + '\n' + results);
+          console.warn(JSON.stringify(results));
         }  //Callback function to handle the result
       );
     });
   }
 
-  inserirProduto = () => {
-
+  selecionarProdutos = async () => {
+    await db.transaction(function (tx) {
+      tx.executeSql(
+        'SELECT * FROM Produtos',  //Query to execute as prepared statement
+        [],  //Argument to pass for the prepared statement
+        (tx, results) => {
+          console.warn(results.rows.item(0).prod_nome);
+        }  //Callback function to handle the result
+      );
+    });
   }
+
+  inserirProduto = async (nome, desc) => {
+    await db.transaction(function (tx) {
+      tx.executeSql(
+        'INSERT INTO Produtos (prod_nome, prod_desc) VALUES (?, ?)',  //Query to execute as prepared statement
+        [nome, desc],  //Argument to pass for the prepared statement
+        (tx, results) => {
+          console.warn(JSON.stringify(results));
+        }  //Callback function to handle the result
+      );
+    });
+    console.warn(this.state.nome);
+  }
+
+  deletarTabela = async () => {
+    await db.transaction((tx) => {
+      tx.executeSql(
+        'DROP TABLE Produtos',  //Query to execute as prepared statement
+        [],  //Argument to pass for the prepared statement
+        (tx, results) => {
+          console.warn(JSON.stringify(results));
+        }  //Callback function to handle the result
+      );
+    });
+  }
+
 
   render() {
     return (
@@ -43,9 +77,9 @@ export default class App extends Component {
           <TextInput style={styles.input}
             placeholder="Descrição do Produto..."
             value={this.state.desc}
-            onChangeText={nome => this.setState({ desc })} />
+            onChangeText={desc => this.setState({ desc })} />
         </View>
-        <TouchableNativeFeedback onPress={this.criarTabela}>
+        <TouchableNativeFeedback onPress={this.deletarTabela}>
           <View style={styles.botao}>
             <Text style={styles.texto2}>Cadastrar</Text>
           </View>
