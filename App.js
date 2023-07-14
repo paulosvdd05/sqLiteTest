@@ -86,7 +86,7 @@ export default class App extends Component {
         'DROP TABLE Produtos',  //Query to execute as prepared statement
         [],  //Argument to pass for the prepared statement
         (tx, results) => {
-          console.warn(JSON.stringify(results));
+          this.setState({produto:[]})
         }  //Callback function to handle the result
       );
     });
