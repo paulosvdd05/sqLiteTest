@@ -7,7 +7,7 @@ var db = openDatabase({ name: 'DatabaseProduotos.db' });
 const initialState = {
   nome: '',
   desc: '',
-  produto: [1]
+  produto: [],
 }
 
 export default class App extends Component {
@@ -19,39 +19,67 @@ export default class App extends Component {
   componentDidMount = async () => {
     await db.transaction((tx) => {
       tx.executeSql(
-        'CREATE TABLE Produtos (prod_id INT AUTO_INCREMENT, prod_nome varchar(30), prod_desc varchar(70), PRIMARY KEY (prod_id))',  //Query to execute as prepared statement
+        'CREATE TABLE IF NOT EXISTS Produtos (prod_id INTEGER PRIMARY KEY, prod_nome varchar(30), prod_desc varchar(70))',  //Query to execute as prepared statement
         [],  //Argument to pass for the prepared statement
-        (tx, results) => {
+        async (tx, results) => {
+          await db.transaction((tx) => {
+            tx.executeSql(
+              'SELECT * FROM Produtos',  //Query to execute as prepared statement
+              [],  //Argument to pass for the prepared statement
+              (tx, results) => {
+                for (let i = 0; i < results.rows.length; i++) {
+                  this.setState({
+                    produto: [...this.state.produto, {
+                      id: results.rows.item(i).prod_id,
+                      nome: results.rows.item(i).prod_nome,
+                      desc: results.rows.item(i).prod_desc,
+                    }]
+                  })
+                  console.warn(results.rows.item(i));
+                }
 
+              }  //Callback function to handle the result
+            );
+          })
         }  //Callback function to handle the result
       );
     });
   }
 
-  selecionarProdutos = async () => {
-    await db.transaction(function (tx) {
+  selecionarProdutos = async (id) => {
+    await db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM Produtos',  //Query to execute as prepared statement
         [],  //Argument to pass for the prepared statement
         (tx, results) => {
-          console.warn(results.rows.item(5).prod_desc);
+          this.setState({
+            produto: [...this.state.produto, {
+              id: results.rows.item(id - 1).prod_id,
+              nome: results.rows.item(id - 1).prod_nome,
+              desc: results.rows.item(id - 1).prod_desc,
+            }]
+          }, () => { console.warn(this.state.produto); })
+
         }  //Callback function to handle the result
       );
     });
   }
 
   inserirProduto = async (nome, desc) => {
-    await db.transaction(function (tx) {
+
+    await db.transaction((tx) => {
       tx.executeSql(
         'INSERT INTO Produtos (prod_nome, prod_desc) VALUES (?, ?)',  //Query to execute as prepared statement
         [nome, desc],  //Argument to pass for the prepared statement
         (tx, results) => {
-          console.warn(JSON.stringify(results));
+          this.selecionarProdutos(results.insertId);
         }  //Callback function to handle the result
       );
     });
-    console.warn(this.state.nome);
+
   }
+
+
 
   deletarTabela = async () => {
     await db.transaction((tx) => {
@@ -69,7 +97,7 @@ export default class App extends Component {
   render() {
     return (
       <View style={{ flex: 1, justifyContent: 'space-evenly', backgroundColor: '#3b434f' }}>
-        <View style={{backgroundColor:'#024EB4', padding:5}}>
+        <View style={{ backgroundColor: '#024EB4', padding: 5 }}>
           <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20, textAlign: 'center' }}>Cadastro de Produtos</Text>
         </View>
         <View style={styles.formContainer}>
@@ -77,8 +105,8 @@ export default class App extends Component {
             <Text style={styles.texto1}>Nome:</Text>
             <TextInput style={styles.input}
               placeholder='Insira o nome do produto.'
-              value={this.state.parcelas}
-              onChangeText={parcelas => this.setState({ parcelas })}
+              value={this.state.nome}
+              onChangeText={nome => this.setState({ nome })}
               keyboardType='numeric'
             />
           </View>
@@ -86,22 +114,25 @@ export default class App extends Component {
             <Text style={styles.texto1}>Descrição:</Text>
             <TextInput style={styles.input}
               placeholder='Insira a descrição do produto.'
-              value={this.state.intervalo}
-              onChangeText={intervalo => this.setState({ intervalo })}
+              value={this.state.desc}
+              onChangeText={desc => this.setState({ desc })}
               keyboardType='numeric'
             />
           </View>
         </View>
         <View style={styles.botaoContainer}>
-          <TouchableOpacity style={styles.botao} onPress={this.calcular}>
-            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cadastar</Text>
+          <TouchableOpacity style={[styles.botao, { backgroundColor: '#024EB4' }]} onPress={() => this.inserirProduto(this.state.nome, this.state.desc)}>
+            <Text style={styles.textoBotao}>CADASTRAR</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.botao, { backgroundColor: '#c60000' }]} onPress={this.deletarTabela}>
+            <Text style={styles.textoBotao}>DELETAR</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.FlatListContainer}>
           <FlatList style={styles.prodList}
-            data={this.state.lista}
+            data={this.state.produto}
             keyExtractor={item => `${item.id}`}
-            renderItem={({ item, index }) => <Tabela {...item} data={moment(new Date(item.data)).format('DD[/]MM[/]YYYY')} index={index} />}
+            renderItem={({ item, index }) => <Produto {...item} index={index} />}
           />
         </View>
 
@@ -127,22 +158,26 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   botao: {
-    backgroundColor: '#024EB4',
-    padding: 10,
+    width: 150,
+    padding: 15,
     borderRadius: 5,
     shadowColor: '#171717',
     elevation: 10,
   },
   botaoContainer: {
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
-    flex: 1
+    flex: 1,
+    flexDirection: 'row'
+  },
+  textoBotao: {
+    color: '#fff', fontWeight: 'bold', fontSize: 15, textAlign: 'center'
   },
   inputContainer: {
     marginHorizontal: 10, marginTop: 10,
   },
   FlatListContainer: {
-    flex: 3,
+    flex: 2,
     backgroundColor: '#fff',
     marginHorizontal: 10,
     borderRadius: 15,

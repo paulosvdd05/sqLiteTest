@@ -6,8 +6,9 @@ export default props => {
     return (
         <View style={[styles.produto, {backgroundColor: props.index % 2 == 0 ? "#ffffff" : "#F2F2F2" }]}>
 
-            <Text  style={{paddingHorizontal:5, borderColor:'#024eb4', borderRightWidth:2, color:'#024eb4', fontWeight:'bold'}}>{props.index + 1}X{props.totalParcela}</Text>
-            <Text style={{fontWeight:'bold', color:'#313131'}}>{props.data}</Text>
+            <Text  style={{paddingHorizontal:5, borderColor:'#024eb4', borderRightWidth:2, color:'#024eb4', fontWeight:'bold'}}>{props.index + 1}{props.totalParcela}</Text>
+            <Text style={{fontWeight:'bold', color:'#313131'}}>{props.nome}</Text>
+            <Text style={{fontWeight:'bold', color:'#313131'}}>{props.desc}</Text>
             
         </View>
     )
