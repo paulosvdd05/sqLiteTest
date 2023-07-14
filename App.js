@@ -1,12 +1,13 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableNativeFeedback } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from "react-native";
 import { openDatabase } from 'react-native-sqlite-storage';
-
+import Produto from "./components/Produto";
 var db = openDatabase({ name: 'DatabaseProduotos.db' });
 
 const initialState = {
   nome: '',
-  desc: ''
+  desc: '',
+  produto: [1]
 }
 
 export default class App extends Component {
@@ -15,13 +16,13 @@ export default class App extends Component {
     ...initialState
   }
 
-  criarTabela = async () => {
+  componentDidMount = async () => {
     await db.transaction((tx) => {
       tx.executeSql(
         'CREATE TABLE Produtos (prod_id INT AUTO_INCREMENT, prod_nome varchar(30), prod_desc varchar(70), PRIMARY KEY (prod_id))',  //Query to execute as prepared statement
         [],  //Argument to pass for the prepared statement
         (tx, results) => {
-          console.warn(JSON.stringify(results));
+
         }  //Callback function to handle the result
       );
     });
@@ -67,61 +68,92 @@ export default class App extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.texto1}>Cadastrar Produto</Text>
-        <View>
-          <TextInput style={styles.input}
-            placeholder="Nome do Produto..."
-            value={this.state.nome}
-            onChangeText={nome => this.setState({ nome })} />
-          <TextInput style={styles.input}
-            placeholder="Descrição do Produto..."
-            value={this.state.desc}
-            onChangeText={desc => this.setState({ desc })} />
+      <View style={{ flex: 1, justifyContent: 'space-evenly', backgroundColor: '#3b434f' }}>
+        <View style={{backgroundColor:'#024EB4', padding:5}}>
+          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20, textAlign: 'center' }}>Cadastro de Produtos</Text>
         </View>
-        <TouchableNativeFeedback onPress={this.selecionarProdutos}>
-          <View style={styles.botao}>
-            <Text style={styles.texto2}>Cadastrar</Text>
+        <View style={styles.formContainer}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.texto1}>Nome:</Text>
+            <TextInput style={styles.input}
+              placeholder='Insira o nome do produto.'
+              value={this.state.parcelas}
+              onChangeText={parcelas => this.setState({ parcelas })}
+              keyboardType='numeric'
+            />
           </View>
-        </TouchableNativeFeedback>
+          <View style={styles.inputContainer}>
+            <Text style={styles.texto1}>Descrição:</Text>
+            <TextInput style={styles.input}
+              placeholder='Insira a descrição do produto.'
+              value={this.state.intervalo}
+              onChangeText={intervalo => this.setState({ intervalo })}
+              keyboardType='numeric'
+            />
+          </View>
+        </View>
+        <View style={styles.botaoContainer}>
+          <TouchableOpacity style={styles.botao} onPress={this.calcular}>
+            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cadastar</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.FlatListContainer}>
+          <FlatList style={styles.prodList}
+            data={this.state.lista}
+            keyExtractor={item => `${item.id}`}
+            renderItem={({ item, index }) => <Tabela {...item} data={moment(new Date(item.data)).format('DD[/]MM[/]YYYY')} index={index} />}
+          />
+        </View>
+
       </View>
-    );
+    )
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1f2329',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  texto1: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff'
-  },
-  texto2: {
-    fontSize: 15,
-    color: '#171717',
-    fontWeight: 'bold'
-  },
   input: {
     height: 40,
-    marginHorizontal: 10,
-    marginTop: 10,
     backgroundColor: '#fff',
+    color: '#313131',
     borderRadius: 10,
     shadowColor: '#171717',
     elevation: 10,
-    width: 280
+    justifyContent: 'center',
+    width: '100%'
+  },
+  texto1: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   botao: {
+    backgroundColor: '#024EB4',
+    padding: 10,
+    borderRadius: 5,
+    shadowColor: '#171717',
+    elevation: 10,
+  },
+  botaoContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
+    flex: 1
+  },
+  inputContainer: {
+    marginHorizontal: 10, marginTop: 10,
+  },
+  FlatListContainer: {
+    flex: 3,
     backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10
-  }
+    marginHorizontal: 10,
+    borderRadius: 15,
+    shadowColor: '#171717',
+    elevation: 10,
+    marginBottom: 10
+  },
+  formContainer: {
+    flex: 1,
+  },
+  prodList: {
+    marginVertical: 10,
+  },
 })
