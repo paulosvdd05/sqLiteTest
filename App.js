@@ -35,7 +35,6 @@ export default class App extends Component {
                       desc: results.rows.item(i).prod_desc,
                     }]
                   })
-                  console.warn(results.rows.item(i));
                 }
 
               }  //Callback function to handle the result
@@ -58,7 +57,7 @@ export default class App extends Component {
               nome: results.rows.item(id - 1).prod_nome,
               desc: results.rows.item(id - 1).prod_desc,
             }]
-          }, () => { console.warn(this.state.produto); })
+          })
 
         }  //Callback function to handle the result
       );
