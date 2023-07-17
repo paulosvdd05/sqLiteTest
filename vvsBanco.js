@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from "r
 import { openDatabase } from 'react-native-sqlite-storage';
 import Produto from "./components/Produto";
 var db = openDatabase({
-    name: 'viavale.db', createFromLocation: '~www/viavale.db',
+    name: 'viavale.db', createFromLocation: '~viavale.db',
 },null, null)
 
 const initialState = {
@@ -18,27 +18,7 @@ export default class App extends Component {
         ...initialState
     }
 
-    componentDidMount = async () => {
-        await db.transaction((tx) => {
-            tx.executeSql(
-                '',  //Query to execute as prepared statement
-                [],  //Argument to pass for the prepared statement
-                async (tx, results) => {
-                    await db.transaction((tx) => {
-                        tx.executeSql(
-                            'SELECT * FROM Produtos',  //Query to execute as prepared statement
-                            [],  //Argument to pass for the prepared statement
-                            (tx, results) => {
-                                console.warn('tabela criada')
-
-                            }  //Callback function to handle the result
-                        );
-                    })
-                }  //Callback function to handle the result
-            );
-        });
-    }
-
+    
     selecionarProdutos = async (id) => {
         await db.transaction((tx) => {
             tx.executeSql(
@@ -74,13 +54,13 @@ export default class App extends Component {
 
 
 
-    deletarTabela = async () => {
-        await db.transaction((tx) => {
-            tx.executeSql(
+    deletarTabela =  () => {
+     db.transaction(async(tx) => {
+           await tx.executeSql(
                 'SELECT * FROM produto',  //Query to execute as prepared statement
                 [],  //Argument to pass for the prepared statement
                 (tx, results) => {
-                    console.warn('aaa');
+                    console.warn(results.rows);
                 }  //Callback function to handle the result
             );
         });
