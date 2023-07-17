@@ -4,7 +4,7 @@ import { openDatabase } from 'react-native-sqlite-storage';
 import Produto from "./components/Produto";
 var db = openDatabase({
     name: 'viavale.db', createFromLocation: '~viavale.db',
-},null, null)
+}, null, null)
 
 const initialState = {
     nome: '',
@@ -18,25 +18,8 @@ export default class App extends Component {
         ...initialState
     }
 
-    
-    selecionarProdutos = async (id) => {
-        await db.transaction((tx) => {
-            tx.executeSql(
-                'SELECT * FROM Produtos',  //Query to execute as prepared statement
-                [],  //Argument to pass for the prepared statement
-                (tx, results) => {
-                    this.setState({
-                        produto: [...this.state.produto, {
-                            id: results.rows.item(id - 1).prod_id,
-                            nome: results.rows.item(id - 1).prod_nome,
-                            desc: results.rows.item(id - 1).prod_desc,
-                        }]
-                    })
 
-                }  //Callback function to handle the result
-            );
-        });
-    }
+
 
     inserirProduto = async (nome, desc) => {
 
@@ -54,13 +37,20 @@ export default class App extends Component {
 
 
 
-    deletarTabela =  () => {
-     db.transaction(async(tx) => {
-           await tx.executeSql(
-                'SELECT * FROM produto',  //Query to execute as prepared statement
+    selecionar = () => {
+        db.transaction(async (tx) => {
+            await tx.executeSql(
+                'SELECT * FROM produto WHERE ra_categoria = "PIZZA"',  //Query to execute as prepared statement
                 [],  //Argument to pass for the prepared statement
                 (tx, results) => {
-                    console.warn(results.rows);
+                    for (let i = 0; i < results.rows.length; ++i) {
+                        this.setState({produto : [...this.state.produto, {
+                            id: results.rows.item(i).id_produto, 
+                            nome: results.rows.item(i).descricao,
+                            desc: results.rows.item(i).etiqueta,
+                        }]}, () => console.warn(i))
+                    }
+                    
                 }  //Callback function to handle the result
             );
         });
@@ -94,10 +84,10 @@ export default class App extends Component {
                     </View>
                 </View>
                 <View style={styles.botaoContainer}>
-                    <TouchableOpacity style={[styles.botao, { backgroundColor: '#024EB4' }]} onPress={() => this.inserirProduto(this.state.nome, this.state.desc)}>
+                    <TouchableOpacity style={[styles.botao, { backgroundColor: '#024EB4' }]} onPress={() => console.warn(this.state.produto)}>
                         <Text style={styles.textoBotao}>CADASTRAR</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.botao, { backgroundColor: '#c60000' }]} onPress={this.deletarTabela}>
+                    <TouchableOpacity style={[styles.botao, { backgroundColor: '#c60000' }]} onPress={this.selecionar}>
                         <Text style={styles.textoBotao}>DELETAR</Text>
                     </TouchableOpacity>
                 </View>
