@@ -25,7 +25,7 @@ export default class App extends Component {
 
         await db.transaction((tx) => {
             tx.executeSql(
-                'INSERT INTO Produtos (prod_nome, prod_desc) VALUES (?, ?)',  //Query to execute as prepared statement
+                'INSERT INTO produto (id_produto, descricao, etiquera) VALUES (?, ?)',  //Query to execute as prepared statement
                 [nome, desc],  //Argument to pass for the prepared statement
                 (tx, results) => {
                     this.selecionarProdutos(results.insertId);
@@ -35,22 +35,21 @@ export default class App extends Component {
 
     }
 
-
-
     selecionar = () => {
         db.transaction(async (tx) => {
             await tx.executeSql(
-                'SELECT * FROM produto WHERE ra_categoria = "PIZZA"',  //Query to execute as prepared statement
+                'SELECT * FROM produto WHERE etiqueta = "1"',  //Query to execute as prepared statement
                 [],  //Argument to pass for the prepared statement
                 (tx, results) => {
                     for (let i = 0; i < results.rows.length; ++i) {
-                        this.setState({produto : [...this.state.produto, {
-                            id: results.rows.item(i).id_produto, 
-                            nome: results.rows.item(i).descricao,
-                            desc: results.rows.item(i).etiqueta,
-                        }]}, () => console.warn(i))
+                        this.setState({
+                            produto: [...this.state.produto, {
+                                id: results.rows.item(i).id_produto,
+                                nome: results.rows.item(i).descricao,
+                                desc: results.rows.item(i).etiqueta,
+                            }]
+                        }, () => console.warn(i))
                     }
-                    
                 }  //Callback function to handle the result
             );
         });
@@ -87,8 +86,8 @@ export default class App extends Component {
                     <TouchableOpacity style={[styles.botao, { backgroundColor: '#024EB4' }]} onPress={() => console.warn(this.state.produto)}>
                         <Text style={styles.textoBotao}>CADASTRAR</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.botao, { backgroundColor: '#c60000' }]} onPress={this.selecionar}>
-                        <Text style={styles.textoBotao}>DELETAR</Text>
+                    <TouchableOpacity style={[styles.botao, { backgroundColor: '#00c600' }]} onPress={this.selecionar}>
+                        <Text style={styles.textoBotao}>SELECIONAR</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.FlatListContainer}>
