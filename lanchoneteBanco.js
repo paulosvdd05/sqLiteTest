@@ -38,7 +38,7 @@ export default class App extends Component {
     selecionar = () => {
         db.transaction(async (tx) => {
             await tx.executeSql(
-                'SELECT * FROM produto WHERE etiqueta = "1"',  //Query to execute as prepared statement
+                'SELECT * FROM produto',  //Query to execute as prepared statement
                 [],  //Argument to pass for the prepared statement
                 (tx, results) => {
                     for (let i = 0; i < results.rows.length; ++i) {
