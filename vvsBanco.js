@@ -9,6 +9,9 @@ var db = openDatabase({
 const initialState = {
     nome: '',
     desc: '',
+    etiqueta: '',
+    valor:'',
+    estoque:'',
     produto: [],
 }
 
@@ -21,12 +24,12 @@ export default class App extends Component {
 
 
 
-    inserirProduto = async (nome, desc) => {
+    inserirProduto = async (nome, desc, etiqueta, valor, estoque) => {
 
         await db.transaction((tx) => {
             tx.executeSql(
-                'INSERT INTO produto (id_produto, descricao, etiquera) VALUES (?, ?)',  //Query to execute as prepared statement
-                [nome, desc],  //Argument to pass for the prepared statement
+                'INSERT INTO produto (id_produto, descricao, etiqueta, valor, qtd_estoque) VALUES (?, ?, ?, ?, ?)',  //Query to execute as prepared statement
+                [nome, desc, etiqueta, valor, estoque],  //Argument to pass for the prepared statement
                 (tx, results) => {
                     this.selecionarProdutos(results.insertId);
                 }  //Callback function to handle the result
@@ -81,9 +84,19 @@ export default class App extends Component {
                             keyboardType='numeric'
                         />
                     </View>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.texto1}>Descrição:</Text>
+                        <TextInput style={styles.input}
+                            placeholder='Insira a descrição do produto.'
+                            value={this.state.desc}
+                            onChangeText={desc => this.setState({ desc })}
+                            keyboardType='numeric'
+                        />
+                    </View>
+                    
                 </View>
                 <View style={styles.botaoContainer}>
-                    <TouchableOpacity style={[styles.botao, { backgroundColor: '#024EB4' }]} onPress={() => console.warn(this.state.produto)}>
+                    <TouchableOpacity style={[styles.botao, { backgroundColor: '#024EB4' }]} onPress={() => this.inserirProduto(this.state.nome, this.state.descricao, this.state.etiqueta, this.state.valor, this.state.estoque)}>
                         <Text style={styles.textoBotao}>CADASTRAR</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.botao, { backgroundColor: '#00c600' }]} onPress={this.selecionar}>

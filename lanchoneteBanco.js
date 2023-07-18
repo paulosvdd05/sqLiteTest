@@ -9,6 +9,9 @@ var db = openDatabase({
 const initialState = {
     nome: '',
     desc: '',
+    etiqueta: '',
+    valor:'',
+    estoque:'',
     produto: [],
 }
 
@@ -21,14 +24,14 @@ export default class App extends Component {
 
 
 
-    inserirProduto = async (nome, desc) => {
-
-        await db.transaction((tx) => {
-            tx.executeSql(
-                'INSERT INTO produto (id_produto, descricao, etiquera) VALUES (?, ?)',  //Query to execute as prepared statement
-                [nome, desc],  //Argument to pass for the prepared statement
+    inserirProduto = async (nome, desc, etiqueta, valor, estoque) => {
+        console.warn(nome + desc + etiqueta + valor + estoque);
+         await db.transaction( (tx) => {
+             tx.executeSql(
+                'INSERT INTO produto (id_produto, descricao, etiqueta, valor, qtd_estoque) VALUES (?, ?, ?, ?, ?)',  //Query to execute as prepared statement
+                [nome, desc, etiqueta, valor, estoque],  //Argument to pass for the prepared statement
                 (tx, results) => {
-                    this.selecionarProdutos(results.insertId);
+                    console.warn(results, tx);
                 }  //Callback function to handle the result
             );
         });
@@ -36,6 +39,7 @@ export default class App extends Component {
     }
 
     selecionar = () => {
+        
         db.transaction(async (tx) => {
             await tx.executeSql(
                 'SELECT * FROM produto',  //Query to execute as prepared statement
@@ -81,9 +85,36 @@ export default class App extends Component {
                             keyboardType='numeric'
                         />
                     </View>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.texto1}>Etiqueta:</Text>
+                        <TextInput style={styles.input}
+                            placeholder='Insira a Etiqueta do produto.'
+                            value={this.state.etiqueta}
+                            onChangeText={etiqueta => this.setState({ etiqueta })}
+                            keyboardType='numeric'
+                        />
+                    </View>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.texto1}>Valor:</Text>
+                        <TextInput style={styles.input}
+                            placeholder='Insira a Valor do produto.'
+                            value={this.state.valor}
+                            onChangeText={valor => this.setState({ valor })}
+                            keyboardType='numeric'
+                        />
+                    </View>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.texto1}>Estoque:</Text>
+                        <TextInput style={styles.input}
+                            placeholder='Insira a Estoque do produto.'
+                            value={this.state.estoque}
+                            onChangeText={estoque => this.setState({ estoque })}
+                            keyboardType='numeric'
+                        />
+                    </View>
                 </View>
                 <View style={styles.botaoContainer}>
-                    <TouchableOpacity style={[styles.botao, { backgroundColor: '#024EB4' }]} onPress={() => console.warn(this.state.produto)}>
+                    <TouchableOpacity style={[styles.botao, { backgroundColor: '#024EB4' }]} onPress={() => this.inserirProduto(this.state.nome, this.state.desc, this.state.etiqueta, this.state.valor, this.state.estoque)}>
                         <Text style={styles.textoBotao}>CADASTRAR</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.botao, { backgroundColor: '#00c600' }]} onPress={this.selecionar}>
@@ -148,7 +179,7 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
     formContainer: {
-        flex: 1,
+        flex: 5,
     },
     prodList: {
         marginVertical: 10,
