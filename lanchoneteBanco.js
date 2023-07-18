@@ -10,8 +10,8 @@ const initialState = {
     nome: '',
     desc: '',
     etiqueta: '',
-    valor:'',
-    estoque:'',
+    valor: '',
+    estoque: '',
     produto: [],
 }
 
@@ -26,8 +26,8 @@ export default class App extends Component {
 
     inserirProduto = async (nome, desc, etiqueta, valor, estoque) => {
         console.warn(nome + desc + etiqueta + valor + estoque);
-         await db.transaction( (tx) => {
-             tx.executeSql(
+        await db.transaction((tx) => {
+            tx.executeSql(
                 'INSERT INTO produto (id_produto, descricao, etiqueta, valor, qtd_estoque) VALUES (?, ?, ?, ?, ?)',  //Query to execute as prepared statement
                 [nome, desc, etiqueta, valor, estoque],  //Argument to pass for the prepared statement
                 (tx, results) => {
@@ -39,24 +39,26 @@ export default class App extends Component {
     }
 
     selecionar = () => {
-        
-        db.transaction(async (tx) => {
-            await tx.executeSql(
-                'SELECT * FROM produto',  //Query to execute as prepared statement
-                [],  //Argument to pass for the prepared statement
-                (tx, results) => {
-                    for (let i = 0; i < results.rows.length; ++i) {
-                        this.setState({
-                            produto: [...this.state.produto, {
-                                id: results.rows.item(i).id_produto,
-                                nome: results.rows.item(i).descricao,
-                                desc: results.rows.item(i).etiqueta,
-                            }]
-                        }, () => console.warn(i))
-                    }
-                }  //Callback function to handle the result
-            );
-        });
+        this.setState({ produto: [] }, () => {
+            db.transaction(async (tx) => {
+                await tx.executeSql(
+                    'SELECT * FROM produto',  //Query to execute as prepared statement
+                    [],  //Argument to pass for the prepared statement
+                    (tx, results) => {
+                        for (let i = 0; i < results.rows.length; ++i) {
+                            this.setState({
+                                produto: [...this.state.produto, {
+                                    id: results.rows.item(i).id_produto,
+                                    nome: results.rows.item(i).descricao,
+                                    desc: results.rows.item(i).etiqueta,
+                                }]
+                            })
+                        }
+                    }  //Callback function to handle the result
+                );
+            });
+        })
+
     }
 
 
@@ -68,9 +70,9 @@ export default class App extends Component {
                 </View>
                 <View style={styles.formContainer}>
                     <View style={styles.inputContainer}>
-                        <Text style={styles.texto1}>Nome:</Text>
+                        <Text style={styles.texto1}>Id:</Text>
                         <TextInput style={styles.input}
-                            placeholder='Insira o nome do produto.'
+                            placeholder='Insira o id do produto.'
                             value={this.state.nome}
                             onChangeText={nome => this.setState({ nome })}
                             keyboardType='numeric'
